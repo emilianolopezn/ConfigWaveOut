@@ -26,7 +26,7 @@ namespace Playback
     {
 
         private Mp3FileReader reader;
-        private WaveOut output;
+        private WaveOutEvent output;
         DispatcherTimer timer;
         bool dragging = false;
 
@@ -82,7 +82,7 @@ namespace Playback
             if(output != null && 
                 output.PlaybackState == PlaybackState.Paused)
             {
-                output.Resume();
+                output.Play();
                 btnPlay.IsEnabled = false;
                 btnPause.IsEnabled = true;
                 btnStop.IsEnabled = true;
@@ -90,9 +90,16 @@ namespace Playback
             {
                 if (txtRuta.Text != null && txtRuta.Text != "")
                 {
-                    output = new WaveOut();
+                    output = new WaveOutEvent();
                     output.PlaybackStopped += OnPlaybackStop;
                     reader = new Mp3FileReader(txtRuta.Text);
+
+                    //Configuraciones de WaveOut
+                    output.DeviceNumber = cbDispositivos.SelectedIndex;
+                    output.NumberOfBuffers = 2;
+                    output.DesiredLatency = 150;
+                    output.Volume = (float)sldVolumen.Value;
+
 
                     output.Init(reader);
                     output.Play();
@@ -173,6 +180,14 @@ namespace Playback
                     btnStop.IsEnabled = false;
                     btnPlay.IsEnabled = true;
                 }
+            }
+        }
+
+        private void sldVolumen_DragCompleted(object sender, RoutedEventArgs e)
+        {
+            if (output != null)
+            {
+                output.Volume = (float)sldVolumen.Value;
             }
         }
     }
